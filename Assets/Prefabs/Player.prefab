@@ -174,12 +174,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 0
   TouchManager: {fileID: 0}
-  rotationSpeed: 20
+  rotationSpeed: 15
   speed: 10
   healthBar: {fileID: 1857708735259885078}
-  playerHeight: -15
+  playerZComponent: -15
   bulletPool: {fileID: 3883664019920735834}
-  bulletFireRate: 0.25
+  bulletFireRate: 0.15
   scoreAndHealthManager: {fileID: 0}
   playerIcon: {fileID: 8925904296633207682}
 --- !u!114 &3883664019920735834

@@ -4,13 +4,19 @@ using UnityEngine.UI;
 
 public class ScoreAndHealthManager : MonoBehaviour
 {
+    [SerializeField] private EndGameManager endGameManager;
+
+    [Header("UI")]
     [SerializeField] private TextMeshProUGUI healthCounter;
     [SerializeField] private Slider healthBar;
     [SerializeField] private TextMeshProUGUI coinsCounter;
     [SerializeField] private Slider coinsBar;
 
+    [Header("GameOver Panel UI")]
+    [SerializeField] private TextMeshProUGUI finishCoinsScore;
+
     private int _coins;
-    private int _maxHealth = 10; 
+    private int _maxHealth = 10;
     private int _health;
 
     public int coins { get => _coins; }
@@ -29,9 +35,11 @@ public class ScoreAndHealthManager : MonoBehaviour
 
         healthCounter.text = _health.ToString();
         coinsCounter.text = _coins.ToString();
+
+        finishCoinsScore.text = _coins.ToString();
     }
 
-    public void collectCoin()
+    public void CollectCoin()
     {
         _coins++;
         coinsCounter.text = _coins.ToString();
@@ -40,18 +48,31 @@ public class ScoreAndHealthManager : MonoBehaviour
             coinsBar.maxValue += 10;
     }
 
-    public void getDamage()
+    public void GetDamage()
     {
         _health--;
         healthBar.value = _health;
         healthCounter.text = _health.ToString();
         if (_health <= 0)
         {
+            
+            Player[] players = FindObjectsOfType<Player>();
+            if(players.Length != 0)
+            {
+                Player mainPlayer = players[0];
+                foreach (var player in players)
+                {
+                    if (player.IsOwner) { mainPlayer = player; break; }
+                }
+                mainPlayer.isGameOver = true;
 
+                endGameManager.PlayerGameOver(mainPlayer.playerId);
+            }
+            finishCoinsScore.text = _coins.ToString();
         }
     }
 
-    public void showHealth()
+    public void ShowHealth()
     {
         healthBar.value = _health;
         healthCounter.text = _health.ToString();

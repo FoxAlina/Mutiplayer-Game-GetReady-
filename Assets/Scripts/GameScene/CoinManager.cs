@@ -1,43 +1,67 @@
+using Unity.Netcode;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.InputSystem.LowLevel.InputStateHistory;
 
-public class CoinManager : MonoBehaviour
+public class CoinManager : NetworkBehaviour
 {
+    public List<GameObject> coins;
+    [SerializeField] private GameObject coinPrefab;
+    [SerializeField] private float numberOfCoins;
+
     [SerializeField] private float horizontalRadius;
     [SerializeField] private float verticalRadius;
-    private ObjectPool coinPool;
-    private float coinNumber;
-    [SerializeField] private float coinHeight;
-    [SerializeField] private float coinRate;
-
-    void Start()
-    {
-        coinPool = GetComponent<ObjectPool>();
-        coinNumber = coinPool.SharedInstance.amountToPool;
-
-        for (int i = 0; i < coinNumber; i++)
-        {
-            GameObject tmp = coinPool.SharedInstance.GetPooledObject();
-            if (tmp)
-            {
-                float y = Random.Range(-verticalRadius, verticalRadius);
-                float x = Random.Range(-horizontalRadius, horizontalRadius);
-
-                tmp.transform.position = new Vector3(x, y, coinHeight);
-                tmp.SetActive(true);
-            }
-        }
-    }
+    [SerializeField] private float coinZComponent;
+    [SerializeField] private float coinSpawnRate;
 
     bool reload = true;
 
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer)
+        {
+            enabled = false;
+        }
+
+        coins = new List<GameObject>();
+        GameObject tmp;
+        for (int i = 0; i < numberOfCoins; i++)
+        {
+            tmp = Instantiate(coinPrefab);
+            tmp.SetActive(false);
+            coins.Add(tmp);
+        }
+    }
+
     private void Update()
     {
-        if (coinPool.SharedInstance.ActiveObjectsAmount() < coinNumber)
+        if (Player.IsRunGame && IsServer)
+            if (ActiveCoinsAmount() < numberOfCoins / 2)
+            {
+                if (reload) StartReloadCoroutine();
+            }
+    }
+
+    GameObject GetCoin()
+    {
+        for (int i = 0; i < coins.Count; i++)
         {
-            if (reload) StartReloadCoroutine();
+            if (!coins[i].activeInHierarchy)
+                return coins[i];
         }
+        return null;
+    }
+
+    int ActiveCoinsAmount()
+    {
+        int k = 0;
+        for (int i = 0; i < coins.Count; i++)
+        {
+            if (coins[i].activeInHierarchy)
+                k++;
+        }
+        return k;
     }
 
     public void StartReloadCoroutine()
@@ -48,18 +72,32 @@ public class CoinManager : MonoBehaviour
 
     IEnumerator reloadCoroutine()
     {
-        yield return new WaitForSeconds(coinRate);
-        
-        GameObject tmp = coinPool.SharedInstance.GetPooledObject();
-        if (tmp)
-        {
-            float y = Random.Range(-verticalRadius, verticalRadius);
-            float x = Random.Range(-horizontalRadius, horizontalRadius);
+        yield return new WaitForSeconds(coinSpawnRate);
 
-            tmp.transform.position = new Vector3(x, y, coinHeight);
-            tmp.SetActive(true);
+        if (IsServer)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                float y = Random.Range(-verticalRadius, verticalRadius);
+                float x = Random.Range(-horizontalRadius, horizontalRadius);
+
+                setActiveCoinClientRpc(x, y);
+            }
+
         }
 
         reload = true;
+    }
+
+    [ClientRpc]
+    void setActiveCoinClientRpc(float x, float y)
+    {
+        GameObject tmp = GetCoin();
+        if (tmp)
+        {
+            Debug.Log("coin");
+            tmp.transform.position = new Vector3(x, y, coinZComponent);
+            tmp.SetActive(true);
+        }
     }
 }

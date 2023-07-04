@@ -5,8 +5,6 @@ public class TouchManager : MonoBehaviour
 {
     private InputControl inputControl;
 
-    //[SerializeField] private GameObject touch_marker;
-
     [SerializeField] private Vector2 joystickSize = new Vector2(300, 300);
     [SerializeField] private Joystick joystick;
 
@@ -18,6 +16,9 @@ public class TouchManager : MonoBehaviour
     private void Awake()
     {
         inputControl = InputControl.Instance;
+
+        joystick.rectTransform.sizeDelta = joystickSize;
+        joystick.rectTransform.anchoredPosition = new Vector2(joystickSize.x / 2 + 10, joystickSize.y / 2 + 10);
     }
     private void OnEnable()
     {
@@ -38,7 +39,6 @@ public class TouchManager : MonoBehaviour
 
     void resetTouch()
     {
-        //touch_marker.SetActive(false);
         target_vector = Vector3.zero;
     }
 
@@ -66,12 +66,11 @@ public class TouchManager : MonoBehaviour
             movementFinger = touchedFinger;
             target_vector = Vector3.zero;
             Vector3 touch_pos = touchedFinger.currentTouch.screenPosition;
-            //touch_marker.transform.position = touch_pos;
-            //touch_marker.SetActive(true);
 
-            joystick.gameObject.SetActive(true);
-            joystick.rectTransform.sizeDelta = joystickSize;
-            joystick.rectTransform.position = ClampStartPosition(touch_pos);
+            //joystick.gameObject.SetActive(true);
+            //joystick.rectTransform.sizeDelta = joystickSize;
+            //joystick.rectTransform.position = ClampStartPosition(touch_pos);
+            // //joystick.rectTransform.anchoredPosition = new Vector2(joystickSize.x / 2 + 10, joystickSize.y / 2 + 10);
             prev_pos = touch_pos;
         }
 
@@ -96,8 +95,6 @@ public class TouchManager : MonoBehaviour
             joystick.knob.anchoredPosition = knobPosition;
 
             target_vector = knobPosition / maxMovement;
-
-            //touch_marker.transform.position = touch_pos;
         }
     }
 
@@ -110,7 +107,7 @@ public class TouchManager : MonoBehaviour
 
             target_vector = Vector2.zero;
             joystick.knob.anchoredPosition = Vector2.zero;
-            joystick.gameObject.SetActive(false);
+            //joystick.gameObject.SetActive(false);
         }
     }
 }

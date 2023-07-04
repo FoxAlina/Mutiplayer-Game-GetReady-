@@ -14,30 +14,39 @@ public class Player : NetworkBehaviour
     private int _health;
     public int health { get => _health; set => _health = value; }
 
-    [SerializeField] float playerHeight = -15;
+    [SerializeField] float playerZComponent = -15;
 
-    bool isGameOver;
+    private bool _isGameOver;
+    public bool isGameOver { get => _isGameOver; set => _isGameOver = value; }
 
     [SerializeField] ObjectPool bulletPool;
     public float bulletFireRate = 0.25f;
     float timeCount = 0f;
     float shootTime = 0f;
 
-    public ScoreAndHealthManager scoreAndHealthManager;
+    [HideInInspector] public ScoreAndHealthManager scoreAndHealthManager;
 
     [SerializeField] SpriteRenderer playerIcon;
+
+    private static bool _IsRunGame = false;
+    public static bool IsRunGame { get => _IsRunGame; set => _IsRunGame = value; }
 
     public override void OnNetworkSpawn()
     {
         scoreAndHealthManager = FindObjectOfType<ScoreAndHealthManager>();
 
-        playerId = (int)NetworkObjectId;
-        playerIcon.sprite = FindObjectOfType<PlayerIconsList>().getIcon((int)NetworkObjectId);
+        //playerId = (int)NetworkObjectId;
+        Player[] players = FindObjectsOfType<Player>();
+        playerId = players.Length - 1;
 
-        if (!IsOwner) enabled = false;
+        playerIcon.sprite = FindObjectOfType<PlayerIconsList>().GetIcon(playerId);
+
+        if (IsOwner) FindObjectOfType<PlayerIconHolder>().SetPlayerIcon(playerIcon.sprite);
 
         healthBar.maxValue = scoreAndHealthManager.maxHealth;
         healthBar.value = scoreAndHealthManager.maxHealth;
+
+        if (!IsOwner) enabled = false;
     }
 
     private void OnEnable()
@@ -54,24 +63,30 @@ public class Player : NetworkBehaviour
     {
         TouchManager = FindObjectOfType<TouchManager>();
 
-        isGameOver = false;
+        _isGameOver = false;
     }
 
     void Update()
     {
-        if (!isGameOver)
+        if (!_isGameOver && _IsRunGame)
         {
             Vector3 v = TouchManager.getTargetVector();
             if (v != Vector3.zero)
             {
-                Vector3 scaledMovement = rotationSpeed * Time.deltaTime * new Vector3(v.x, v.y, playerHeight);
+                Vector3 scaledMovement = rotationSpeed * Time.deltaTime * new Vector3(v.x, v.y, playerZComponent);
                 //transform.LookAt(transform.position + scaledMovement, Vector3.forward);
                 transform.rotation = Quaternion.LookRotation(scaledMovement, Vector3.forward);
 
                 transform.Translate(speed * v.magnitude * Vector2.up * Time.deltaTime);
             }
-            transform.position = new Vector3(transform.position.x, transform.position.y, playerHeight);
+            transform.position = new Vector3(transform.position.x, transform.position.y, playerZComponent);
         }
+        if (_isGameOver)
+            if (!IsOwner)
+
+            {
+                gameObject.SetActive(false);
+            }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -79,11 +94,11 @@ public class Player : NetworkBehaviour
         if (IsOwner)
             if (collision.collider.tag == "Coin")
             {
-                scoreAndHealthManager.collectCoin();
+                scoreAndHealthManager.CollectCoin();
             }
     }
 
-    public void setBulletIds()
+    public void SetBulletIds()
     {
         for (int i = 0; i < bulletPool.SharedInstance.amountToPool; i++)
         {
@@ -96,37 +111,21 @@ public class Player : NetworkBehaviour
     {
         if (IsOwner)
         {
-            scoreAndHealthManager.getDamage();
+            scoreAndHealthManager.GetDamage();
             healthBar.value = scoreAndHealthManager.health;
-            //RequestGetDamageServerRpc();
-        }        
+        }
     }
 
-    public void showHealth()
+    public void ShowHealth()
     {
         healthBar.value = _health;
     }
-
-    //[ServerRpc]
-    //private void RequestGetDamageServerRpc()
-    //{
-    //    GetDamageClientRpc();
-    //}
-
-    //[ClientRpc]
-    //private void GetDamageClientRpc()
-    //{
-    //    if (!IsOwner)
-    //    {
-    //        healthBar.value = scoreAndHealthManager.health;
-    //    }
-    //}
     #endregion
 
     #region Shooting
     public void Fire()
     {
-        if (!isGameOver)
+        if (!_isGameOver)
         {
             timeCount += Time.deltaTime;
             if (timeCount >= shootTime)
@@ -136,15 +135,6 @@ public class Player : NetworkBehaviour
                 RequestFireServerRpc(transform.position, transform.rotation.eulerAngles);
 
                 ExecuteShoot(transform.position, transform.rotation.eulerAngles);
-
-                //GameObject bullet = bulletPool.SharedInstance.GetPooledObject();
-                //if (bullet != null)
-                //{
-                //    bullet.transform.position = transform.position;
-                //    bullet.transform.rotation = transform.rotation;
-                //    bullet.transform.Rotate(new Vector3(0f, 0f, 90f));
-                //    bullet.SetActive(true);
-                //}
             }
         }
     }
