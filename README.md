@@ -1,3 +1,3 @@
 # Mutiplayer-Game-GetReady-
 
-Multiplayer game for Android created with Unity Netcode and Relay.
+Multiplayer 2D game for Android created with Unity Netcode and Relay.
