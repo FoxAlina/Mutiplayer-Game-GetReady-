@@ -4,32 +4,24 @@ using UnityEngine.UI;
 
 public class Player : NetworkBehaviour
 {
-    public int playerId;
-
-    public TouchManager TouchManager;
     [SerializeField] private float rotationSpeed = 20f;
     [SerializeField] private float speed = 10f;
-
     [SerializeField] public Slider healthBar;
-    private int _health;
-    public int health { get => _health; set => _health = value; }
-
     [SerializeField] float playerZComponent = -15;
-
-    private bool _isGameOver;
-    public bool isGameOver { get => _isGameOver; set => _isGameOver = value; }
-
     [SerializeField] ObjectPool bulletPool;
+    [SerializeField] SpriteRenderer playerIcon;
+
     public float bulletFireRate = 0.25f;
     float timeCount = 0f;
     float shootTime = 0f;
 
     [HideInInspector] public ScoreAndHealthManager scoreAndHealthManager;
 
-    [SerializeField] SpriteRenderer playerIcon;
-
-    private static bool _IsRunGame = false;
-    public static bool IsRunGame { get => _IsRunGame; set => _IsRunGame = value; }
+    public int playerId { get; set; }
+    public TouchManager TouchManager { get; set; }
+    public int Health { get; set; }
+    public bool IsGameOver { get; set; }
+    public static bool IsRunGame { get; set; } = false;
 
     public override void OnNetworkSpawn()
     {
@@ -63,12 +55,12 @@ public class Player : NetworkBehaviour
     {
         TouchManager = FindObjectOfType<TouchManager>();
 
-        _isGameOver = false;
+        IsGameOver = false;
     }
 
     void Update()
     {
-        if (!_isGameOver && _IsRunGame)
+        if (!IsGameOver && IsRunGame)
         {
             Vector3 v = TouchManager.getTargetVector();
             if (v != Vector3.zero)
@@ -81,9 +73,8 @@ public class Player : NetworkBehaviour
             }
             transform.position = new Vector3(transform.position.x, transform.position.y, playerZComponent);
         }
-        if (_isGameOver)
+        if (IsGameOver)
             if (!IsOwner)
-
             {
                 gameObject.SetActive(false);
             }
@@ -118,14 +109,14 @@ public class Player : NetworkBehaviour
 
     public void ShowHealth()
     {
-        healthBar.value = _health;
+        healthBar.value = Health;
     }
     #endregion
 
     #region Shooting
     public void Fire()
     {
-        if (!_isGameOver)
+        if (!IsGameOver)
         {
             timeCount += Time.deltaTime;
             if (timeCount >= shootTime)

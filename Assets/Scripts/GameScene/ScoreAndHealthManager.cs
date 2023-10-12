@@ -16,7 +16,7 @@ public class ScoreAndHealthManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI finishCoinsScore;
 
     private int _coins;
-    private int _maxHealth = 10;
+    private readonly int _maxHealth = 10;
     private int _health;
 
     public int coins { get => _coins; }
@@ -55,7 +55,8 @@ public class ScoreAndHealthManager : MonoBehaviour
         healthCounter.text = _health.ToString();
         if (_health <= 0)
         {
-            
+            ShowFinishScore();
+
             Player[] players = FindObjectsOfType<Player>();
             if(players.Length != 0)
             {
@@ -64,12 +65,16 @@ public class ScoreAndHealthManager : MonoBehaviour
                 {
                     if (player.IsOwner) { mainPlayer = player; break; }
                 }
-                mainPlayer.isGameOver = true;
+                mainPlayer.IsGameOver = true;
 
                 endGameManager.PlayerGameOver(mainPlayer.playerId);
             }
-            finishCoinsScore.text = _coins.ToString();
         }
+    }
+
+    public void ShowFinishScore()
+    {
+        finishCoinsScore.text = _coins.ToString();
     }
 
     public void ShowHealth()

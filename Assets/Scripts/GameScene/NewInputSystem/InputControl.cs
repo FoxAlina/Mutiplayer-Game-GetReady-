@@ -5,7 +5,7 @@ using ETouch = UnityEngine.InputSystem.EnhancedTouch;
 [DefaultExecutionOrder(-1)]
 public class InputControl : Singleton<InputControl>
 {
-    #region
+    #region events
     public delegate void FingerDown(Finger obj);
     public event FingerDown OnFingerDown;
     public delegate void FingerMove(Finger obj);
@@ -32,7 +32,7 @@ public class InputControl : Singleton<InputControl>
         EnhancedTouchSupport.Enable();
         ETouch.Touch.onFingerDown += TouchOnFingerDown;
         ETouch.Touch.onFingerUp += TouchOnFingerUp;
-        ETouch.Touch.onFingerMove += TouchOnfingerMove;
+        ETouch.Touch.onFingerMove += TouchOnFingerMove;
 
         playerControls.Enable();
     }
@@ -44,14 +44,14 @@ public class InputControl : Singleton<InputControl>
 
         ETouch.Touch.onFingerDown -= TouchOnFingerDown;
         ETouch.Touch.onFingerUp -= TouchOnFingerUp;
-        ETouch.Touch.onFingerMove -= TouchOnfingerMove;
+        ETouch.Touch.onFingerMove -= TouchOnFingerMove;
 
         EnhancedTouchSupport.Disable();
 
         TouchSimulation.Disable();
     }
 
-    private void TouchOnfingerMove(Finger obj)
+    private void TouchOnFingerMove(Finger obj)
     {
         if (OnFingerMove != null) OnFingerMove(obj);
     }

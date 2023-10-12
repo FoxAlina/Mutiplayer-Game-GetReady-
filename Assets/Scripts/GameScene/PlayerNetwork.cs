@@ -22,7 +22,7 @@ public class PlayerNetwork : NetworkBehaviour
             transform.position = _playerState.Value.Position;
             transform.rotation = Quaternion.Euler(_playerState.Value.Rotation.x, _playerState.Value.Rotation.y, _playerState.Value.Rotation.z);
 
-            GetComponent<Player>().health = _playerState.Value.Health;
+            GetComponent<Player>().Health = _playerState.Value.Health;
             GetComponent<Player>().ShowHealth();
         }
     }

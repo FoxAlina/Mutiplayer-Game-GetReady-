@@ -4589,6 +4589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f3354797d93aad45ad25b4f0e0a1df0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreAndHealthManager: {fileID: 1748610466}
   gameOverPanel: {fileID: 115760849}
   gameOverText: {fileID: 814024935}
   winText: {fileID: 1469173708}

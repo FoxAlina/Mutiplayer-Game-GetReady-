@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class EndGameManager : NetworkBehaviour
 {
+    [SerializeField] ScoreAndHealthManager scoreAndHealthManager;
+
     private int clientsNumber = 0;
     private bool gameover = false;
 
@@ -35,6 +37,7 @@ public class EndGameManager : NetworkBehaviour
     #region UI
     void ShowWin()
     {
+        scoreAndHealthManager.ShowFinishScore();
         gameOverPanel.SetActive(true);
         winText.SetActive(true);
     }
